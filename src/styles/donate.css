@@ -1,0 +1,71 @@
+.donate-hero { overflow: hidden; padding-block: clamp(54px, 7vw, 88px); background: linear-gradient(115deg, #f5f8fc 48%, #edf6f7); border-bottom: 1px solid var(--border); }
+.donate-hero__grid { display: grid; grid-template-columns: minmax(0, 1fr) 270px; align-items: center; gap: 70px; }
+.donate-hero h1 { max-width: 820px; font-size: clamp(2.4rem, 4.9vw, 4.25rem); }
+.donate-hero h1 span { color: var(--blue); }
+.donate-hero__subtitle { max-width: 650px; margin-top: 25px; font-size: clamp(1rem, 1.4vw, 1.125rem); }
+.donate-hero__subtitle + p { max-width: 590px; margin-top: 15px; font-size: 14px; }
+.donate-hero .button { margin-top: 28px; }
+.donate-hero__art { position: relative; display: grid; justify-items: center; padding: 28px 0; text-align: center; }
+.donate-orbit { position: absolute; inset: 0 0 52px; border: 1px dashed #cad9df; border-radius: 50%; transform: rotate(-25deg); }
+.donate-heart { position: relative; display: grid; place-items: center; width: 128px; height: 128px; margin-bottom: 28px; border: 10px solid #e1f5ef; border-radius: 30px; color: var(--navy); background: var(--mint); transform: rotate(-8deg); box-shadow: var(--shadow); }
+.donate-hero__art p { position: relative; font-size: 13px; }
+.donate-hero__art strong { color: var(--navy); }
+.donate-section-description { margin-top: 16px; }
+.donate-impact__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-top: 38px; }
+.donate-impact__grid > div { height: 100%; }
+.donate-impact__card { height: 100%; padding: 30px; border: 1px solid var(--border); border-radius: var(--radius); background: white; transition: transform .2s, box-shadow .2s, border-color .2s; }
+.donate-impact__card:hover { transform: translateY(-5px); border-color: #bed1f2; box-shadow: var(--shadow); }
+.donate-impact__icon { display: grid; place-items: center; width: 52px; height: 52px; margin-bottom: 23px; color: var(--blue); background: #eaf1ff; border-radius: 12px; }
+.donate-impact__grid > :nth-child(2) .donate-impact__icon { color: #137860; background: #e2f5ef; }
+.donate-impact__card p { margin-top: 12px; font-size: 13px; }
+.donate-give { background: var(--surface); border-block: 1px solid var(--border); }
+.donate-give__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(36px, 7vw, 100px); align-items: start; }
+.donate-give__copy > p:not(.eyebrow) { margin-top: 22px; max-width: 450px; }
+.donate-security { display: flex; gap: 16px; padding-top: 30px; margin-top: 30px; border-top: 1px solid var(--border); }
+.donate-security > svg { flex-shrink: 0; color: #137860; }
+.donate-security h3 { font-size: 15px; }
+.donate-security p { margin-top: 8px; font-size: 13px; }
+.donate-give__copy .donate-concept { font-size: 12px; }
+.donation-panel { min-width: 0; padding: clamp(22px, 3vw, 38px); background: white; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.donation-amounts { min-width: 0; margin: 0; padding: 0; border: 0; }
+.donation-amounts legend { padding: 0; margin-bottom: 16px; font-weight: 650; }
+.donation-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
+.donation-presets button, .donation-custom-toggle { min-height: 48px; border: 1px solid #d3dce8; border-radius: 8px; color: var(--navy); background: white; font-size: 13px; font-weight: 650; transition: border-color .2s, background .2s; }
+.donation-presets button:hover, .donation-custom-toggle:hover { border-color: var(--blue); }
+.donation-amounts [aria-pressed='true'] { color: var(--blue); border-color: var(--blue); background: #eef4ff; box-shadow: inset 0 0 0 1px var(--blue); }
+.donation-custom-toggle { width: 100%; margin-top: 12px; }
+.donation-custom { margin-top: 18px; }
+.donation-custom label { display: block; margin-bottom: 8px; font-size: 13px; font-weight: 600; }
+.donation-custom input { width: 100%; min-width: 0; min-height: 48px; padding: 10px 14px; color: var(--navy); background: white; border: 1px solid #d3dce8; border-radius: 8px; }
+.donation-help { margin-top: 12px; font-size: 11px; }
+.donation-error { margin-top: 12px; color: #a12626; font-size: 13px; }
+.donation-total { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; padding-block: 20px; margin-top: 15px; border-top: 1px solid var(--border); font-size: 13px; }
+.donation-total strong { color: var(--navy); font-family: var(--font-heading); font-size: 23px; }
+.donation-notice { margin-bottom: 20px; padding: 16px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 13px; overflow-wrap: anywhere; }
+.donation-notice .text-link { min-height: 44px; border: 0; padding: 0; background: transparent; }
+.donation-notice .button { margin-top: 14px; }
+.donation-continue, .donation-payment > .button { width: 100%; }
+.donation-panel button:disabled { opacity: .55; cursor: not-allowed; }
+.donation-panel fieldset:disabled { opacity: .65; }
+.donation-payment { min-width: 0; }
+.donation-footnote { display: flex; justify-content: center; align-items: center; gap: 7px; }
+.donate-closing { padding-block: 72px; text-align: center; background: #eef7f5; }
+.donate-closing .eyebrow { justify-content: center; }
+.donate-closing p:not(.eyebrow) { max-width: 580px; margin: 20px auto 26px; }
+.donate-status { background: var(--surface); min-height: 60vh; }
+.donate-status .donation-panel { max-width: 700px; margin-inline: auto; }
+.donate-status h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: 24px; }
+.donate-status .button, .donate-status .text-link { margin-top: 24px; margin-right: 18px; }
+@media (max-width: 900px) {
+  .donate-hero__grid { grid-template-columns: minmax(0, 1fr) 200px; gap: 28px; }
+  .donate-impact__grid { gap: 16px; }
+  .donate-impact__card { padding: 24px; }
+  .donation-presets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 767px) {
+  .donate-give__grid { grid-template-columns: minmax(0, 1fr); }
+  .donate-impact__grid { grid-template-columns: minmax(0, 1fr); }
+  .donate-hero__grid { grid-template-columns: minmax(0, 1fr); }
+  .donate-hero__art { display: none; }
+  .donate-closing { padding-block: 58px; }
+}

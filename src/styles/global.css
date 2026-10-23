@@ -1,0 +1,76 @@
+:root {
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #102440;
+  background: #fff;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  --navy: #102440;
+  --blue: #2563eb;
+  --mint: #5ee0c1;
+  --slate: #64748b;
+  --text-muted: #5c6d83;
+  --surface: #f5f8fc;
+  --border: #e2e8f0;
+  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --radius: 20px;
+  --shadow: 0 16px 40px -20px rgb(16 36 64 / 20%);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 110px; }
+body { margin: 0; min-width: 320px; font-size: 15px; line-height: 1.75; }
+button, input { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+button { cursor: pointer; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; }
+img { max-width: 100%; }
+button svg, a svg { flex-shrink: 0; }
+::selection { background: var(--mint); color: var(--navy); }
+:focus-visible { outline: 3px solid var(--blue); outline-offset: 5px; border-radius: 4px; }
+main:focus, section[tabindex='-1']:focus { outline: none; }
+h1, h2, h3, h4, p { margin: 0; }
+h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 750; }
+h1, h2 { text-wrap: balance; }
+h1 { font-size: clamp(2.6rem, 5.5vw, 5.1rem); line-height: 1.13; letter-spacing: -.057em; }
+h2 { font-size: clamp(2rem, 3.4vw, 3rem); line-height: 1.23; letter-spacing: -.045em; }
+h3 { font-size: 1.25rem; line-height: 1.4; letter-spacing: -.03em; }
+p { color: var(--text-muted); }
+ul { padding: 0; margin: 0; list-style: none; }
+.container { width: min(1200px, calc(100% - 96px)); margin-inline: auto; }
+.section { padding-block: clamp(72px, 8vw, 112px); }
+.eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; color: var(--blue); font-size: 10px; line-height: 1.6; letter-spacing: .17em; font-weight: 750; text-transform: uppercase; }
+.eyebrow::before { content: ''; width: 7px; height: 7px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+.button { display: inline-flex; justify-content: center; align-items: center; gap: 13px; min-height: 50px; padding: 13px 22px; border: 1px solid transparent; border-radius: 8px; font-size: 12px; font-weight: 650; line-height: 1.5; transition: background .2s, color .2s, box-shadow .2s, transform .2s; }
+.button svg { width: 17px; height: 17px; transition: transform .2s; }
+.button:hover svg { transform: translateX(3px); }
+.button:active { transform: translateY(1px); }
+.button-primary { color: white; background: var(--blue); box-shadow: 0 4px 10px rgb(37 99 235 / 12%); }
+.button-primary:hover { background: #1c50c9; box-shadow: 0 6px 18px rgb(37 99 235 / 22%); }
+.button-secondary { color: var(--navy); border-color: #d3dce8; background: white; }
+.button-secondary:hover { border-color: var(--navy); background: var(--surface); }
+.button-mint { background: var(--mint); color: var(--navy); }
+.button-mint:hover { background: #85ebd2; box-shadow: 0 6px 20px rgb(94 224 193 / 15%); }
+.text-link { display: inline-flex; align-items: center; gap: 9px; font-size: 13px; font-weight: 650; color: var(--blue); }
+.text-link svg { width: 17px; transition: transform .2s; }
+.text-link:hover svg { transform: translateX(4px); }
+.skip-link { position: fixed; top: 10px; left: 16px; z-index: 1000; padding: 12px 22px; border-radius: 8px; background: var(--navy); color: white; transform: translateY(-150%); }
+.skip-link:focus { transform: translateY(0); }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+
+@media (max-width: 900px) {
+  .container { width: calc(100% - 56px); }
+}
+@media (max-width: 600px) {
+  .container { width: calc(100% - 40px); }
+  body { font-size: 14px; }
+  .eyebrow { font-size: 9px; margin-bottom: 18px; }
+  .button { min-height: 48px; padding-inline: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; scroll-behavior: auto !important; }
+}
