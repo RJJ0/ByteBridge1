@@ -39,7 +39,7 @@ npm run dev
 
 On Windows with restricted PowerShell execution, use `npm.cmd`. Backend dotenv loading is relative to `server/server.js`, so starting from the root works. Restart the API after updating `server/.env`; Vite must also reload after frontend environment changes. Stop any older backend still listening on port 4242 first.
 
-## What enables Continue to payment
+## What enables Donate
 
 `GET /donation-config` authenticates with Stripe and checks the account country's supported PHP payment currency. Live keys additionally require `charges_enabled` and an active card-payments capability. Test keys allow sandbox checkout before live activation. Successful checks are cached for one minute. The route returns the configured bounds in centavos:
 
@@ -57,7 +57,7 @@ These default application bounds mean PHP 100–100,000. Invalid keys, inactive 
 { "amount": 25000, "currency": "php", "requestId": "a-client-generated-v4-uuid" }
 ```
 
-The server validates a safe integer amount against its own bounds, enforces PHP, and creates an unconfirmed Stripe intent for the exact amount. The UUID scopes a Stripe idempotency key. Repeated requests with the same parameters reuse the intent; changed parameters with the same key fail. The response contains `clientSecret`, `amount`, and `currency` from Stripe. Responses are not cached, browser origins are restricted, request sizes are bounded, and API requests are rate limited. Stripe error objects and client secrets are never logged.
+The server validates a safe integer amount against its own bounds, enforces PHP, and creates an unconfirmed Stripe intent for the exact amount. The UUID scopes a Stripe idempotency key. Repeated requests with the same parameters reuse the intent; changed parameters with the same key fail. The response contains `clientSecret`, `amount`, and `currency` from Stripe, plus an HMAC-signed `reference` for read-only status verification. Responses are not cached, browser origins are restricted, request sizes are bounded, and API requests are rate limited. Stripe error objects and client secrets are never logged.
 
 The frontend independently retrieves the intent through Stripe and checks amount, currency, and payable status before mounting Elements. Changing an amount immediately removes the old form, creates a new request ID, and debounces preparation. Late responses are ignored. Retries preserve the ID. Confirmation locks amount controls and guards against duplicate clicks, with another Stripe amount check immediately before submission. No raw card information is collected outside Stripe.
 
@@ -75,9 +75,11 @@ Put the CLI's signing secret in `server/.env`, then restart the API. Complete an
 
 ## Return route and hosting
 
-`/payment-success` retrieves status directly through Stripe; a success URL parameter cannot prove a payment. The return secret is removed from the current URL and held in memory. Refreshing that page cannot reverify after removal and gives an unverified message. Browser status never creates a donation record.
+`/donation/success` shows Thank you only after `POST /donation-status` retrieves a succeeded PaymentIntent from Stripe using the server key. The endpoint accepts the signed reference, or a Stripe return client secret for compatibility, and checks project metadata, PHP currency, test/live mode, and the full amount received. It returns only status, confirmed amount, currency, and a signed reference. It never creates or confirms payments or writes donation records. References authorize lookup of this limited status information; do not publish them. Rotating the Stripe secret key invalidates existing references.
 
-Configure SPA fallbacks for `/about`, `/donate`, and `/payment-success`. Use HTTPS, explicit production frontend origins, a persistent database, and the correct live webhook endpoint before enabling live payments. Avoid logging payment-return query strings. The document referrer policy restricts outbound referrers.
+Immediate successful confirmations navigate to this page; redirect-based confirmations return to it. Claimed URL statuses and client amounts are ignored. Stripe return secrets are removed from the URL and replaced with the signed reference so refresh can safely reverify. Processing, canceled, incomplete, unavailable, and invalid references show a neutral status with a Donation link. `/payment-success` remains a compatible alias and uses the same backend verification.
+
+Configure SPA fallbacks for `/about`, `/donate`, `/donation/success`, and `/payment-success`. Use HTTPS, explicit production frontend origins, a persistent database, and the correct live webhook endpoint before enabling live payments. Avoid logging payment-return query strings. The document referrer policy restricts outbound referrers.
 
 ## Verification
 
@@ -86,10 +88,13 @@ npm test --prefix server
 npm run build
 npm run lint
 node scripts/donation-audit.mjs
+node scripts/thank-you-audit.mjs
 ```
 
-The eight backend tests exercise API validation, exact amounts, Stripe idempotency, test/live account readiness, allowed origins, upstream errors, signed webhook verification, SQLite deduplication/status ordering, and persistence failures. These tests simulate Stripe responses. The donation browser audit also simulates payment behavior, including the unavailable API state.
+The ten backend tests exercise API validation, exact amounts, Stripe idempotency, test/live account readiness, allowed origins, upstream errors, signed webhook verification, SQLite deduplication/status ordering, persistence failures, and signed read-only status verification. These tests simulate Stripe responses. The browser audits also simulate payment behavior, including success navigation, safe refresh, incomplete payments, invalid references, and the unavailable API state.
 
-`node scripts/stripe-checkout-audit.mjs` checks the real configured test backend and Stripe-hosted PaymentElement. It creates unconfirmed PHP 250 and PHP 350.50 test intents and verifies the form reloads with the selected amount. It never submits a payment. This real checkout check passed after configuring the matching test keys; no actual payment was completed. Reports omit client secrets and are written under ignored `artifacts/qa/`.
+`node scripts/stripe-checkout-audit.mjs` checks the real configured test backend and Stripe-hosted PaymentElement. It creates unconfirmed PHP 250 and PHP 350.50 test intents and verifies the form reloads with the selected amount. It never submits a payment. Reports omit client secrets and are written under ignored `artifacts/qa/`.
+
+On October 23, 2026, a separate real Stripe test-card payment of PHP 250 completed through the PaymentElement. Backend verification, the Thank You page, and refresh were checked successfully. This was test mode only; live payments and real webhook delivery were not verified by that check.
 
 Stripe references: [PaymentIntent creation](https://docs.stripe.com/api/payment_intents/create), [PaymentIntents](https://docs.stripe.com/api/payment_intents), and [Country Specs](https://docs.stripe.com/api/country_specs).

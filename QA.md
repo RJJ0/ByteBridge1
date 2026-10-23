@@ -1,5 +1,16 @@
 # Verification
 
+## Dark/orange reference redesign — October 23, 2026
+
+- Rebuilt shared tokens and restyled Home, About, Donation, payment status, navigation, footer, brand, and favicon. Preserved content, routes, disclosures, and payment/backend behavior.
+- Reference decisions are recorded in `DESIGN.md`. Motion uses 180ms microinteractions and 450–600ms reveals, with reduced-motion support and no continuous hero drift.
+- `npm.cmd run build` (including TypeScript) and `npm.cmd run lint`: passed.
+- `node scripts/redesign-audit.mjs`: all 32 route/width cases passed at 320, 375, 430, 768, 1024, 1280, 1440, and 1920px. No horizontal overflow, broken images, missing/duplicate h1s, or runtime errors. Eight page axe scans and one mobile-menu axe scan had no violations.
+- Existing interaction audit: all 12 checks passed, including keyboard disclosures, menu focus/Escape/resize, route focus, mission scrolling, reduced motion, and fallback routing.
+- Donation audit: all eight grouped checks passed, including simulated payment errors, processing/success locks, idempotency IDs, stale responses, and amount verification.
+- Real Stripe test form verification: Continue to payment enabled; actual hosted fields became visible for PHP 250 and custom PHP 350.50. Stripe fields use the dark Appearance theme. No payment was submitted, and no actual webhook delivery was tested.
+- Desktop/mobile Home, About, and Donation screenshots plus the real Stripe payment panel were inspected. Reports and screenshots are under ignored `artifacts/qa/`.
+
 ## Stripe credential recheck and real checkout — October 23, 2026
 
 - Updated local test keys now authenticate with Stripe. No secret is present in the frontend environment.

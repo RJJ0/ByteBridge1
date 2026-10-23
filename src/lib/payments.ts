@@ -3,6 +3,7 @@ import { loadStripe } from '@stripe/stripe-js/pure'
 const key = (import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY ?? '').trim()
 export const paymentConfigured = /^pk_(test|live)_/.test(key)
   && (!import.meta.env.DEV || key.startsWith('pk_test_'))
+export const paymentTestMode = paymentConfigured && key.startsWith('pk_test_')
 export const apiUrl = (import.meta.env.VITE_API_URL ?? '').replace(/\/$/, '')
 let stripePromise: ReturnType<typeof loadStripe> | undefined
 

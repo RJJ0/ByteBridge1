@@ -1,23 +1,24 @@
 import { useEffect, useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
-import { ArrowRight, BookOpen, Heart, Monitor, ShieldCheck, UsersRound } from 'lucide-react'
+import { ArrowRight, Heart, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Donation from '../components/Donation'
 import ScrollReveal from '../components/ScrollReveal'
-import { apiUrl, formatAmount, getStripe, parseAmount, paymentConfigured } from '../lib/payments'
+import { apiUrl, formatAmount, getStripe, parseAmount, paymentConfigured, paymentTestMode } from '../lib/payments'
 import '../styles/donate.css'
 
 interface DonationConfig { currency: 'php'; minAmount: number; maxAmount: number }
 interface IntentRequest { amount: number; requestId: string }
 
 const impacts = [
-  { icon: BookOpen, title: 'Digital Education', description: 'Support accessible digital literacy learning, one useful skill at a time.' },
-  { icon: Monitor, title: 'Technology Access', description: 'Help communities access essential technology resources and explore new possibilities.' },
-  { icon: UsersRound, title: 'Community Empowerment', description: 'Support opportunities to build practical digital skills and move forward with confidence.' },
+  { image: '/images/digital_educ.png', width: 1448, height: 1086, title: 'Digital Education', description: 'Support accessible digital literacy learning, one useful skill at a time.' },
+  { image: '/images/tech_access.png', width: 1672, height: 941, title: 'Technology Access', description: 'Help communities access essential technology resources and explore new possibilities.' },
+  { image: '/images/com_empowerment.png', width: 1672, height: 941, title: 'Community Empowerment', description: 'Support opportunities to build practical digital skills and move forward with confidence.' },
 ]
 
 function IntentCheckout({ request, onLock }: { request: IntentRequest; onLock: (locked: boolean) => void }) {
   const [clientSecret, setClientSecret] = useState('')
+  const [reference, setReference] = useState('')
   const [error, setError] = useState('')
   const [attempt, setAttempt] = useState(0)
 
@@ -33,7 +34,8 @@ function IntentCheckout({ request, onLock }: { request: IntentRequest; onLock: (
         })
         if (!response.ok) throw new Error('Unable to prepare your donation. Please try again.')
         const data = await response.json()
-        if (typeof data.clientSecret !== 'string' || data.amount !== request.amount || data.currency !== 'php') {
+        if (typeof data.clientSecret !== 'string' || data.amount !== request.amount || data.currency !== 'php'
+          || typeof data.reference !== 'string' || !/^pi_[A-Za-z0-9]+\.[a-f0-9]{64}$/.test(data.reference)) {
           throw new Error('The payment total could not be verified. No payment has been submitted.')
         }
         const stripe = await getStripe()
@@ -43,7 +45,7 @@ function IntentCheckout({ request, onLock }: { request: IntentRequest; onLock: (
           || !['requires_payment_method', 'requires_confirmation'].includes(result.paymentIntent.status)) {
           throw new Error('The payment total or status could not be verified. No payment has been submitted.')
         }
-        if (!controller.signal.aborted) setClientSecret(data.clientSecret)
+        if (!controller.signal.aborted) { setReference(data.reference); setClientSecret(data.clientSecret) }
       } catch (failure) {
         if (!controller.signal.aborted) setError(failure instanceof Error ? failure.message : 'Unable to load secure payments. Please try again.')
       }
@@ -54,8 +56,8 @@ function IntentCheckout({ request, onLock }: { request: IntentRequest; onLock: (
   if (error) return <div className="donation-notice"><p className="donation-error" role="alert">{error}</p><button className="button button-secondary" onClick={() => { setError(''); setAttempt(value => value + 1) }}>Try again</button></div>
   if (!clientSecret) return <p className="donation-notice" role="status">Preparing secure payment for {formatAmount(request.amount)}…</p>
   return <Elements key={clientSecret} stripe={getStripe()} options={{ clientSecret, appearance: {
-    theme: 'stripe', variables: { colorPrimary: '#2563eb', colorText: '#102440', borderRadius: '8px', fontFamily: 'system-ui, sans-serif' },
-  } }}><Donation amount={request.amount} clientSecret={clientSecret} onLock={onLock} /></Elements>
+    theme: 'night', variables: { colorPrimary: '#ff9f0a', colorBackground: '#202020', colorText: '#f5f5f5', colorTextSecondary: '#a3a3a3', colorDanger: '#ffb4ab', borderRadius: '12px', fontFamily: 'system-ui, sans-serif' },
+  } }}><Donation amount={request.amount} clientSecret={clientSecret} reference={reference} onLock={onLock} /></Elements>
 }
 
 export default function Donate() {
@@ -115,7 +117,7 @@ export default function Donate() {
 
     <section className="section donate-impact" aria-labelledby="impact-heading"><div className="container">
       <ScrollReveal><p className="eyebrow">What your support can make possible</p><h2 id="impact-heading">More access. More opportunity.</h2><p className="donate-section-description">Three ways to help build a more inclusive digital future.</p></ScrollReveal>
-      <div className="donate-impact__grid">{impacts.map(({ icon: Icon, title, description }, index) => <ScrollReveal key={title} delay={index * 80}><article className="donate-impact__card"><span className="donate-impact__icon"><Icon size={26} aria-hidden="true" /></span><h3>{title}</h3><p>{description}</p></article></ScrollReveal>)}</div>
+      <div className="donate-impact__grid">{impacts.map(({ image, width, height, title, description }, index) => <ScrollReveal key={title} delay={index * 80}><article className="donate-impact__card"><img className="donate-impact__image" src={image} width={width} height={height} alt="" loading="lazy" decoding="async" /><h3>{title}</h3><p>{description}</p></article></ScrollReveal>)}</div>
     </div></section>
 
     <section className="section donate-give" id="give" tabIndex={-1} aria-labelledby="give-heading"><div className="container donate-give__grid">
@@ -134,9 +136,10 @@ export default function Donate() {
         {configState === 'unavailable' && <div className="donation-notice" role="status"><p>Online donations are currently unavailable. Please check back soon.</p><button type="button" className="text-link" onClick={() => { setConfigState('loading'); setConfigAttempt(value => value + 1) }}>Check availability again</button></div>}
         {!request && <button type="button" className="button button-primary donation-continue" disabled={!config || !valid || locked} onClick={() => {
           if (amount !== null) { setStarted(true); setRequest({ amount, requestId: crypto.randomUUID() }) }
-        }}>Continue to payment <ArrowRight aria-hidden="true" /></button>}
+        }}>Donate <ArrowRight aria-hidden="true" /></button>}
         {request && <IntentCheckout key={request.requestId} request={request} onLock={setLocked} />}
         <p className="donation-help donation-footnote"><ShieldCheck size={15} aria-hidden="true" /> Payment details stay within Stripe.</p>
+        {paymentTestMode && <p className="donation-demo">This is a demo, so no real money moves. Pay with the test card 4242 4242 4242 4242, any future date, and any CVC.</p>}
       </div>
     </div></section>
 

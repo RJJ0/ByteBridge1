@@ -47,7 +47,7 @@ function LearningGraphic() {
         </div>
       </div>
       <div className="learning-note"><span><Heart size={17} /></span>Progress, at your own pace.</div>
-      <MousePointer2 className="graphic-cursor" size={40} fill="#5ee0c1" strokeWidth={1.5} />
+      <MousePointer2 className="graphic-cursor" size={40} fill="var(--accent)" strokeWidth={1.5} />
     </div>
   )
 }
@@ -63,10 +63,9 @@ export default function Home() {
             <h1 id="home-heading" className="hero-enter" style={entrance(90)}>Digital Skills<br />for <span>Everyone.</span><svg className="heading-underline" viewBox="0 0 350 16" fill="none" aria-hidden="true"><path d="M4 11C85 1 239 0 346 8" stroke="currentColor" strokeWidth="7" strokeLinecap="round" /></svg></h1>
             <p className="hero-description hero-enter" style={entrance(180)}>Technology should open doors, not create barriers. ByteBridge believes that digital knowledge can empower people, strengthen communities, and create new opportunities.</p>
             <div className="hero-actions hero-enter" style={entrance(270)}>
-              <Link to="/#mission" className="button button-primary">Discover Our Mission <ArrowRight aria-hidden="true" /></Link>
-              <Link to="/about" className="button button-secondary">About Us <ArrowUpRight aria-hidden="true" /></Link>
+              <Link to="/donate" className="button button-primary">Make a Donation <ArrowUpRight aria-hidden="true" /></Link>
+              <Link to="/about" className="text-link">About Us <ArrowUpRight aria-hidden="true" /></Link>
             </div>
-            <div className="hero-footnote hero-enter" style={entrance(360)}><span className="hero-footnote-icon"><Users size={17} aria-hidden="true" /></span><p>Student-led ideas.<br /><strong>Community-minded possibilities.</strong></p></div>
           </div>
           <div className="hero-visual hero-image-enter">
             <div className="hero-photo-frame">
@@ -74,16 +73,17 @@ export default function Home() {
               <div className="photo-caption"><span className="caption-line" /><span>Big possibilities.<br /><strong>Small first steps.</strong></span></div>
             </div>
             <div className="hero-sticker"><Sparkles size={22} strokeWidth={1.6} aria-hidden="true" /><span>A brighter<br />digital future.</span></div>
-            <div className="hero-floating-card"><span className="floating-icon"><BookOpen size={23} strokeWidth={1.6} aria-hidden="true" /></span><div><strong>Knowledge opens doors.</strong><p>Let’s make it accessible.</p></div><ArrowUpRight size={18} aria-hidden="true" /></div>
             <span className="hero-dots" aria-hidden="true" />
             <span className="hero-photo-label">CURIOSITY IS WHERE IT BEGINS</span>
           </div>
         </div>
-        <div className="container hero-bottom">
-          <span className="hero-bottom-label">A LITTLE KNOWLEDGE.<br /><strong>A WORLD OF POSSIBILITY.</strong></span>
-          <Link to="/#digital-literacy"><Monitor size={19} aria-hidden="true" /> Digital Literacy <ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link to="/#online-safety"><ShieldCheck size={19} aria-hidden="true" /> Online Safety <ArrowUpRight size={14} aria-hidden="true" /></Link>
-          <Link to="/#technology-opportunities"><CodeXml size={19} aria-hidden="true" /> Technology Opportunities <ArrowUpRight size={14} aria-hidden="true" /></Link>
+      </section>
+
+      <section className="section focus-section" id="focus-areas" tabIndex={-1} aria-labelledby="focus-heading">
+        <div className="container">
+          <ScrollReveal className="section-heading-row"><div><p className="eyebrow">Our Focus Areas</p><h2 id="focus-heading">Skills That Make<br /><span>a Difference.</span></h2></div><p>Three connected areas. One shared purpose.<br />Helping more people feel at home in the digital world.</p></ScrollReveal>
+          <div className="program-grid">{focusAreas.map((area, index) => <ScrollReveal key={area.id} delay={index * 100}><ProgramCard {...area} /></ScrollReveal>)}</div>
+          <ScrollReveal className="focus-note"><Lightbulb size={16} aria-hidden="true" /><p>Our proposed focus areas — a starting point for learning, sharing, and growing together.</p></ScrollReveal>
         </div>
       </section>
 
@@ -91,7 +91,7 @@ export default function Home() {
         <div className="container divide-grid">
           <ScrollReveal className="divide-copy">
             <p className="eyebrow">Understanding the Gap</p>
-            <h2 id="divide-heading">The Digital Divide Is More Than a Connection.</h2>
+            <h2 id="divide-heading">The Digital Divide Is <span>More Than a Connection.</span></h2>
             <p>Getting online is only the beginning. Knowing how to find reliable information, use everyday tools, and stay safe is what turns access into opportunity.</p>
             <p>For Filipino students and communities with fewer learning resources, a little guidance can make the digital world feel less out of reach.</p>
             <Link to="/#focus-areas" className="text-link">See where we focus <ArrowRight aria-hidden="true" /></Link>
@@ -121,17 +121,11 @@ export default function Home() {
         <div className="container mission-bottom"><span>OUR BELIEF</span><p>Bridging the Digital Divide, One Skill at a Time.</p><ArrowUpRight size={20} aria-hidden="true" /></div>
       </section>
 
-      <section className="section focus-section" id="focus-areas" tabIndex={-1} aria-labelledby="focus-heading">
-        <div className="container">
-          <ScrollReveal className="section-heading-row"><div><p className="eyebrow">Our Focus Areas</p><h2 id="focus-heading">Skills That Make<br />a Difference.</h2></div><p>Three connected areas. One shared purpose.<br />Helping more people feel at home in the digital world.</p></ScrollReveal>
-          <div className="program-grid">{focusAreas.map((area, index) => <ScrollReveal key={area.id} delay={index * 100}><ProgramCard {...area} /></ScrollReveal>)}</div>
-          <ScrollReveal className="focus-note"><Lightbulb size={16} aria-hidden="true" /><p>Our proposed focus areas — a starting point for learning, sharing, and growing together.</p></ScrollReveal>
-        </div>
-      </section>
+
 
       <section className="section approach-section" aria-labelledby="approach-heading">
         <div className="container">
-          <ScrollReveal className="centered-heading"><p className="eyebrow">Our Proposed Approach</p><h2 id="approach-heading">Learn. Build. Connect.</h2><p>Meaningful progress begins with a simple first step.</p></ScrollReveal>
+          <ScrollReveal className="centered-heading"><p className="eyebrow">Our Proposed Approach</p><h2 id="approach-heading">Learn. Build. <span>Connect.</span></h2><p>Meaningful progress begins with a simple first step.</p></ScrollReveal>
           <div className="approach-grid">
             <ScrollReveal className="approach-step"><div className="step-track"><span>01</span><BookOpen size={22} strokeWidth={1.6} aria-hidden="true" /></div><h3>Start with curiosity.</h3><span className="step-name">LEARN</span><p>Get comfortable with essential digital concepts. Ask questions, explore the basics, and build a foundation at your own pace.</p></ScrollReveal>
             <ScrollReveal className="approach-step" delay={100}><div className="step-track"><span>02</span><CodeXml size={22} strokeWidth={1.6} aria-hidden="true" /></div><h3>Put knowledge into practice.</h3><span className="step-name">BUILD</span><p>Turn learning into doing through small, practical activities. Create something useful and make responsible technology use a habit.</p></ScrollReveal>

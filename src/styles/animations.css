@@ -14,18 +14,18 @@
 }
 
 .scroll-reveal.is-revealed {
-  animation: bytebridge-reveal 650ms cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms) both;
+  animation: bytebridge-reveal 450ms cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms) both;
 }
 
 .hero-enter {
-  animation: bytebridge-reveal 760ms cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms) both;
+  animation: bytebridge-reveal 550ms cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms) both;
 }
 
 .hero-image-enter {
-  animation: bytebridge-image-reveal 1000ms cubic-bezier(.22, 1, .36, 1) 180ms both;
+  animation: bytebridge-image-reveal 600ms cubic-bezier(.22, 1, .36, 1) 180ms both;
 }
 
-.gradient-drift { animation: bytebridge-gradient-drift 12s ease-in-out infinite; }
+.gradient-drift { animation: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-reveal.is-revealed,

@@ -33,6 +33,52 @@ async function fixture(t, options = {}) {
   return { base, post, calls };
 }
 
+test('donation status verifies Stripe and supports read-only signed references on refresh', async t => {
+  let retrievals = 0;
+  let status = 'succeeded';
+  const intent = { id: 'pi_verified', client_secret: 'pi_verified_secret_fixture', metadata: { project: 'bytebridge' },
+    currency: 'php', amount: 35050, amount_received: 35050, livemode: false };
+  const { base, calls } = await fixture(t, { stripeOverrides: { paymentIntents: {
+    retrieve: async id => { retrievals++; assert.equal(id, intent.id); return { ...intent, status }; },
+  } } });
+  const check = body => fetch(`${base}/donation-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const first = await check({ clientSecret: intent.client_secret, amount: 1, status: 'failed' });
+  assert.equal(first.headers.get('cache-control'), 'no-store');
+  const verified = await first.json();
+  assert.equal(verified.status, 'succeeded');
+  assert.equal(verified.amount, 35050);
+  assert.equal(verified.currency, 'php');
+  assert.equal(JSON.stringify(verified).includes('secret'), false);
+  for (let i = 0; i < 2; i++) assert.deepEqual(await (await check({ reference: verified.reference })).json(), verified);
+  for (status of ['processing', 'requires_payment_method', 'canceled', 'requires_action', 'requires_capture']) {
+    const pending = await (await check({ reference: verified.reference })).json();
+    assert.equal(pending.status, status);
+    assert.equal(pending.amount, null);
+  }
+  const before = retrievals;
+  for (const body of [{}, { reference: 'pi_verified' }, { reference: `${verified.reference.slice(0, -2)}00` }, { clientSecret: 'invalid' }]) {
+    assert.equal((await check(body)).status, 400);
+  }
+  assert.equal(retrievals, before);
+  assert.equal((await check({ clientSecret: 'pi_verified_secret_wrong' })).status, 404);
+  assert.equal(calls.length, 0);
+});
+
+test('donation status rejects unrelated, inconsistent and unavailable Stripe records', async t => {
+  const intent = { id: 'pi_verified', client_secret: 'pi_verified_secret_fixture', status: 'succeeded',
+    metadata: { project: 'bytebridge' }, currency: 'php', amount: 25000, amount_received: 25000, livemode: false };
+  for (const overrides of [{ metadata: {} }, { currency: 'usd' }, { livemode: true }, { amount_received: 24999 }, { amount: -1 }, { id: 'pi_other' }]) {
+    const { base } = await fixture(t, { stripeOverrides: { paymentIntents: { retrieve: async () => ({ ...intent, ...overrides }) } } });
+    const response = await fetch(`${base}/donation-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientSecret: intent.client_secret }) });
+    assert.equal(response.status, 404);
+    assert.equal(JSON.stringify(await response.json()).includes('secret'), false);
+  }
+  const { base } = await fixture(t, { stripeOverrides: { paymentIntents: { retrieve: async () => { throw new Error('Sensitive Stripe details'); } } } });
+  const response = await fetch(`${base}/donation-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientSecret: intent.client_secret }) });
+  assert.equal(response.status, 502);
+  assert.equal(JSON.stringify(await response.json()).includes('Sensitive'), false);
+});
+
 test('configuration confirms account PHP capability and supports both local origins', async t => {
   const { base } = await fixture(t);
   for (const origin of ['http://localhost:5173', 'http://127.0.0.1:5173']) {

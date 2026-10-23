@@ -106,7 +106,7 @@ export default function About() {
           </ScrollReveal>
           <ScrollReveal className="about-story__copy" delay={120}>
             <p className="eyebrow">Our story</p>
-            <h2 id="story-heading">Built on the Belief That Digital Knowledge Should Be Accessible.</h2>
+            <h2 id="story-heading">Built on the Belief That Digital Knowledge <span>Should Be Accessible.</span></h2>
             <p>Knowing how to use technology can turn an everyday task into a new possibility: finding a learning resource, creating a first résumé, or recognizing an unsafe message.</p>
             <p>ByteBridge is a student-created nonprofit concept inspired by these possibilities. It explores how practical digital education could support Filipino students, young adults, and communities with limited access to learning opportunities.</p>
             <p>Our starting point is simple: students can contribute by sharing clear information, encouraging responsible technology use, and making space for others to learn. This website presents that purpose and our proposed approach.</p>
@@ -119,7 +119,7 @@ export default function About() {
         <div className="container">
           <ScrollReveal className="about-section-heading">
             <p className="eyebrow">Our direction</p>
-            <h2 id="purpose-heading">A clear purpose.<br />A more inclusive future.</h2>
+            <h2 id="purpose-heading">A clear purpose.<br /><span>A more inclusive future.</span></h2>
           </ScrollReveal>
           <div className="about-purpose__grid">
             <ScrollReveal className="about-purpose__reveal">
@@ -143,7 +143,7 @@ export default function About() {
       <section className="section about-values" aria-labelledby="values-heading">
         <div className="container">
           <ScrollReveal className="about-section-heading about-section-heading--split">
-            <div><p className="eyebrow">Our core values</p><h2 id="values-heading">What We Believe In.</h2></div>
+            <div><p className="eyebrow">Our core values</p><h2 id="values-heading">What We <span>Believe In.</span></h2></div>
             <p>Four principles that shape how we think about technology, learning, and community.</p>
           </ScrollReveal>
           <div className="about-values__grid">
@@ -165,7 +165,7 @@ export default function About() {
         <div className="container">
           <ScrollReveal className="about-section-heading about-section-heading--center">
             <p className="eyebrow">The people behind the purpose</p>
-            <h2 id="team-heading">The Minds Behind ByteBridge.</h2>
+            <h2 id="team-heading">The Minds Behind <span>ByteBridge.</span></h2>
             <p>A student-led concept, shaped by curiosity, shared responsibility, and the belief that knowledge is better when it is shared.</p>
           </ScrollReveal>
           {teamMembers.length > 0 ? (

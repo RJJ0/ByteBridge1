@@ -22,7 +22,7 @@ try {
     assert.equal(await page.title(), 'Donation | ByteBridge')
     assert.equal(await page.locator('meta[name="description"]').getAttribute('content'), 'Help bridge the digital divide through digital education, technology access, and community empowerment.')
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true)
-    assert.equal(await page.getByRole('button', { name: 'Continue to payment' }).isDisabled(), true)
+    assert.equal(await page.getByRole('button', { name: 'Donate', exact: true }).isDisabled(), true)
     await page.screenshot({ path: `artifacts/qa/donate-${width}.png`, fullPage: true })
     if (width === 375 || width === 1440) {
       const scan = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze()
@@ -72,6 +72,7 @@ try {
     }
   })
   let reactImport = '/node_modules/.vite/deps/react.js'
+  let testMode = true
   await mock.route('**/src/**/*.tsx*', async route => {
     const response = await route.fetch()
     const source = await response.text()
@@ -81,6 +82,7 @@ try {
   await mock.route('**/test-payments', route => route.fulfill({ contentType: 'text/javascript', body: `
     export { formatAmount, parseAmount } from '/src/lib/payments.ts';
     export const paymentConfigured = true;
+    export const paymentTestMode = ${testMode};
     export const apiUrl = '/test-api';
     export const getStripe = () => Promise.resolve(window.__fakeStripe);
   ` }))
@@ -98,13 +100,22 @@ try {
     const data = route.request().postDataJSON()
     requests.push(data)
     await new Promise(resolve => setTimeout(resolve, data.amount === 50000 ? 600 : 50))
-    await route.fulfill(apiFailure ? { status: 503, json: {} } : { json: { amount: data.amount, currency: 'php', clientSecret: `test_${data.amount}` } })
+    await route.fulfill(apiFailure ? { status: 503, json: {} } : { json: { amount: data.amount, currency: 'php', clientSecret: `test_${data.amount}`, reference: `pi_mock${data.amount}.${'a'.repeat(64)}` } })
+  })
+  await mock.route('**/test-api/donation-status', async route => {
+    const { reference } = route.request().postDataJSON()
+    if (!/^pi_mock\d+\.a{64}$/.test(reference ?? '')) return route.fulfill({ status: 400, json: {} })
+    const status = await checkout.evaluate(() => window.__paymentTest.status)
+    return route.fulfill({ json: { reference, status, currency: 'php', amount: status === 'succeeded' ? Number(reference.match(/pi_mock(\d+)/)[1]) : null } })
   })
   const checkout = await mock.newPage()
   checkout.on('pageerror', error => errors.push(error.message))
   await checkout.goto(`${base}/donate`, { waitUntil: 'networkidle' })
   if (errors.length) throw new Error(JSON.stringify(errors))
-  await checkout.getByRole('button', { name: 'Continue to payment' }).click()
+  const demoText = 'This is a demo, so no real money moves. Pay with the test card 4242 4242 4242 4242, any future date, and any CVC.'
+  assert.equal(await checkout.locator('.donation-demo').innerText(), demoText)
+  assert.equal(await checkout.locator('.donation-footnote + .donation-demo').count(), 1)
+  await checkout.getByRole('button', { name: 'Donate', exact: true }).click()
   const donate = checkout.getByRole('button', { name: 'Donate Now', exact: true })
   await donate.waitFor()
   assert.equal(requests.length, 1)
@@ -128,7 +139,7 @@ try {
 
   await checkout.reload({ waitUntil: 'networkidle' })
   apiFailure = true
-  await checkout.getByRole('button', { name: 'Continue to payment' }).click()
+  await checkout.getByRole('button', { name: 'Donate', exact: true }).click()
   await checkout.getByText('Unable to prepare your donation.', { exact: false }).waitFor()
   const requestId = requests.at(-1).requestId
   apiFailure = false
@@ -141,18 +152,42 @@ try {
   assert.equal(await donate.isEnabled(), true)
   await checkout.evaluate(() => { window.__paymentTest.fail = false })
   await donate.dblclick()
-  await checkout.getByText('Thank you! Stripe confirms your payment succeeded.').waitFor()
+  await checkout.getByRole('heading', { name: 'Thank you!', exact: true }).waitFor()
   assert.equal(await checkout.evaluate(() => window.__paymentTest.confirmations), 2)
-  assert.equal(await checkout.getByRole('button', { name: 'Payment submitted', exact: true }).isDisabled(), true)
-  checks.push('Simulated API/Stripe: preparation retry preserves idempotency ID; decline is accessible; double submit results in one confirmation; success locks controls')
+  assert.match(checkout.url(), /\/donation\/success\?reference=/)
+  assert.match(await checkout.locator('.thank-you__amount').innerText(), /250/)
+  const createdBeforeRefresh = requests.length
   await checkout.reload({ waitUntil: 'networkidle' })
-  await checkout.getByRole('button', { name: 'Continue to payment' }).click()
+  await checkout.getByRole('heading', { name: 'Thank you!', exact: true }).waitFor()
+  assert.equal(requests.length, createdBeforeRefresh)
+  checks.push('Simulated API/Stripe: retry keeps idempotency ID; decline allows correction; double submit confirms once; verified success redirects and refresh creates no payment')
+  await checkout.goto(`${base}/donate`, { waitUntil: 'networkidle' })
+  await checkout.getByRole('button', { name: 'Donate', exact: true }).click()
   await donate.waitFor()
   await checkout.evaluate(() => { window.__paymentTest.status = 'processing' })
   await donate.click()
   await checkout.getByText('Your payment is processing or awaiting confirmation.', { exact: false }).waitFor()
-  assert.equal(await checkout.getByRole('button', { name: 'Payment submitted', exact: true }).isDisabled(), true)
+  assert.equal(await checkout.getByRole('button', { name: 'Payment status pending', exact: true }).isDisabled(), true)
+  assert.equal(new URL(checkout.url()).pathname, '/donate')
   checks.push('Simulated Stripe: processing state locks checkout')
+  assert.equal(await checkout.locator('.donation-demo').innerText(), demoText)
+  for (const status of ['requires_payment_method', 'canceled']) {
+    await checkout.goto(`${base}/donate`, { waitUntil: 'networkidle' })
+    await checkout.getByRole('button', { name: 'Donate', exact: true }).click()
+    await donate.waitFor()
+    await checkout.evaluate(status => { window.__paymentTest.status = status }, status)
+    await donate.click()
+    await checkout.getByRole('alert').waitFor()
+    assert.equal(new URL(checkout.url()).pathname, '/donate')
+    if (status === 'requires_payment_method') assert.equal(await donate.isEnabled(), true)
+    else assert.equal(await checkout.getByRole('button', { name: 'Payment status pending', exact: true }).isDisabled(), true)
+  }
+  checks.push('Simulated Stripe: incomplete payment permits correction; canceled payment shows error without success navigation')
+  testMode = false
+  await checkout.reload({ waitUntil: 'networkidle' })
+  assert.equal(await checkout.locator('.donation-demo').count(), 0)
+  assert.equal(await checkout.getByText('Payment details stay within Stripe.', { exact: false }).count(), 1)
+  checks.push('Demo notice follows Stripe security text in test mode, persists through checkout, and is absent in live mode')
   assert.deepEqual(errors, [])
   await writeFile('artifacts/qa/donation-report.json', JSON.stringify({ checks, errors, actualPaymentTested: false }, null, 2))
   console.log(JSON.stringify({ passed: checks.length, checks, actualPaymentTested: false }, null, 2))

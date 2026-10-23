@@ -1,6 +1,7 @@
 ﻿const path = require('node:path');
 require('dotenv').config({ path: path.join(__dirname, '.env'), quiet: true });
 const express = require('express');
+const { createHmac, timingSafeEqual } = require('node:crypto');
 const cors = require('cors');
 const Stripe = require('stripe');
 const { recordWebhookEvent } = require('./donation-store');
@@ -21,6 +22,8 @@ function createApp({ env = process.env, stripeClient, recordEvent = recordWebhoo
   const allowedOrigins = (env.FRONTEND_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173')
     .split(',').map(value => value.trim()).filter(Boolean);
   const validAmount = amount => Number.isSafeInteger(amount) && amount >= minAmount && amount <= maxAmount;
+  const signReference = id => createHmac('sha256', secretKey).update(`bytebridge-status:${id}`).digest('hex');
+  const paymentReference = id => `${id}.${signReference(id)}`;
   app.disable('x-powered-by');
   app.use((_req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
   app.use(cors({ origin: allowedOrigins, methods: ['GET', 'POST'], allowedHeaders: ['Content-Type'] }));
@@ -112,10 +115,37 @@ function createApp({ env = process.env, stripeClient, recordEvent = recordWebhoo
         || intent.livemode !== secretKey.startsWith('sk_live_')) {
         return res.status(502).json({ error: 'Payment details could not be verified.' });
       }
-      return res.json({ clientSecret: intent.client_secret, amount: intent.amount, currency: intent.currency });
+      return res.json({ clientSecret: intent.client_secret, amount: intent.amount, currency: intent.currency, reference: paymentReference(intent.id) });
     } catch (error) {
       // Do not log Stripe errors: they can contain sensitive request/response details.
       return res.status(error.type === 'StripeIdempotencyError' ? 409 : 502).json({ error: 'Unable to prepare this payment. Please try again.' });
+    }
+  });
+  // Read-only verification: references authorize status lookup, never a new payment.
+  app.post('/donation-status', rateLimit, async (req, res) => {
+    if (!stripe || !keyValid) return res.status(503).json({ error: 'Payment verification unavailable.' });
+    const { reference, clientSecret } = req.body || {};
+    let id;
+    if (typeof reference === 'string' && /^pi_[A-Za-z0-9]+\.[a-f0-9]{64}$/.test(reference)) {
+      const [candidate, signature] = reference.split('.');
+      if (timingSafeEqual(Buffer.from(signature, 'hex'), Buffer.from(signReference(candidate), 'hex'))) id = candidate;
+    } else if (!reference && typeof clientSecret === 'string' && /^pi_[A-Za-z0-9]+_secret_[A-Za-z0-9]+$/.test(clientSecret)) {
+      id = clientSecret.split('_secret_')[0];
+    }
+    if (!id) return res.status(400).json({ error: 'Invalid payment reference.' });
+    try {
+      const intent = await stripe.paymentIntents.retrieve(id);
+      if (intent.id !== id || (!reference && intent.client_secret !== clientSecret)
+        || intent.metadata?.project !== 'bytebridge' || intent.currency !== 'php'
+        || !Number.isSafeInteger(intent.amount) || intent.amount <= 0 || intent.amount > 99999999
+        || intent.livemode !== secretKey.startsWith('sk_live_')
+        || (intent.status === 'succeeded' && intent.amount_received !== intent.amount)) {
+        return res.status(404).json({ error: 'Payment could not be verified.' });
+      }
+      return res.json({ status: intent.status, currency: intent.currency,
+        amount: intent.status === 'succeeded' ? intent.amount_received : null, reference: paymentReference(id) });
+    } catch {
+      return res.status(502).json({ error: 'Payment could not be verified.' });
     }
   });
   app.use((error, _req, res, _next) => {

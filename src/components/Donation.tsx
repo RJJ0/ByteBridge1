@@ -1,14 +1,18 @@
 ﻿import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { PaymentElement, useElements, useStripe } from '@stripe/react-stripe-js'
+import { useNavigate } from 'react-router-dom'
 import { formatAmount } from '../lib/payments'
 
 interface DonationProps {
   amount: number
   clientSecret: string
+  reference: string
   onLock: (locked: boolean) => void
 }
 
-export default function Donation({ amount, clientSecret, onLock }: DonationProps) {
+export default function Donation({ amount, clientSecret, reference, onLock }: DonationProps) {
+  const navigate = useNavigate()
+  const successUrl = `/donation/success?reference=${encodeURIComponent(reference)}`
   const stripe = useStripe()
   const elements = useElements()
   const mounted = useRef(false)
@@ -47,25 +51,39 @@ export default function Donation({ amount, clientSecret, onLock }: DonationProps
       if (current.paymentIntent.status === 'succeeded' || current.paymentIntent.status === 'processing') {
         keepLocked = true
         setTerminal(true)
-        setMessage(current.paymentIntent.status === 'succeeded'
-          ? 'Thank you! Stripe confirms your payment succeeded.' : 'Your payment is processing. Please do not submit another donation.')
+        if (current.paymentIntent.status === 'succeeded') navigate(successUrl, { replace: true })
+        else setMessage('Your payment is processing. Please do not submit another donation.')
+        return
+      }
+      if (current.paymentIntent.status === 'canceled') {
+        keepLocked = true
+        setTerminal(true)
+        setFailed(true)
+        setMessage('This payment was canceled. Please reload before trying again.')
         return
       }
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
-        confirmParams: { return_url: `${window.location.origin}/payment-success` },
+        confirmParams: { return_url: `${window.location.origin}${successUrl}` },
         redirect: 'if_required',
       })
       if (!mounted.current) return
       if (error) {
         setFailed(true)
         setMessage(error.message ?? 'Payment could not be completed. Please check your payment details.')
+      } else if (paymentIntent?.status === 'requires_payment_method') {
+        setFailed(true)
+        setMessage('Payment could not be completed. Please check your payment details and try again.')
+      } else if (paymentIntent?.status === 'canceled') {
+        keepLocked = true
+        setTerminal(true)
+        setFailed(true)
+        setMessage('This payment was canceled. Please reload before trying again.')
       } else {
         keepLocked = true
         setTerminal(true)
-        setMessage(paymentIntent?.status === 'succeeded'
-          ? 'Thank you! Stripe confirms your payment succeeded.'
-          : 'Your payment is processing or awaiting confirmation. Please do not submit another donation.')
+        if (paymentIntent?.status === 'succeeded') navigate(successUrl, { replace: true })
+        else setMessage('Your payment is processing or awaiting confirmation. Please do not submit another donation.')
       }
     } catch {
       // A network failure may happen after payment. Keep this intent locked until status is checked.
@@ -93,9 +111,10 @@ export default function Donation({ amount, clientSecret, onLock }: DonationProps
       }} />
       <p className="donation-total">Your one-time donation <strong>{formatAmount(amount)}</strong></p>
       <button className="button button-primary" type="submit" disabled={!stripe || !elements || !ready || loading || terminal}>
-        {loading ? 'Processing…' : terminal ? 'Payment submitted' : 'Donate Now'}
+        {loading ? 'Processing…' : terminal ? 'Payment status pending' : 'Donate Now'}
       </button>
       {message && <p className={failed ? 'donation-error' : 'donation-notice'} role={failed ? 'alert' : 'status'}>{message}</p>}
+      {terminal && <a className="text-link" href={successUrl}>Check payment status</a>}
     </form>
   )
 }

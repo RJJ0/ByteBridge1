@@ -6,6 +6,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import Donate from './pages/Donate'
 import PaymentSuccess from './pages/PaymentSuccess'
+import ThankYou from './pages/ThankYou'
 import Home from './pages/Home'
 import About from './pages/About'
 
@@ -17,7 +18,7 @@ function RouteEffects() {
   useEffect(() => {
     const isAbout = location.pathname === '/about'
     const isDonate = location.pathname === '/donate'
-    const isPayment = location.pathname === '/payment-success'
+    const isPayment = location.pathname === '/payment-success' || location.pathname === '/donation/success'
 
     document.title = isPayment ? 'Payment Status | ByteBridge' : isDonate ? 'Donation | ByteBridge' : isAbout
       ? 'About Us | ByteBridge'
@@ -86,6 +87,7 @@ export default function App() {
           />
 
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/donation/success" element={<ThankYou />} />
           <Route
             path="*"
             element={<Navigate to="/" replace />}
