@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
-import { ArrowRight, Heart, ShieldCheck } from 'lucide-react'
+import { ArrowRight, FlaskConical, Heart, ShieldCheck } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import Donation from '../components/Donation'
+import LocalPayments from '../components/LocalPayments'
 import ScrollReveal from '../components/ScrollReveal'
+import { isRegistered, organization } from '../data/organization'
 import { apiUrl, formatAmount, getStripe, parseAmount, paymentConfigured, paymentTestMode } from '../lib/payments'
 import '../styles/donate.css'
 
@@ -11,9 +13,9 @@ interface DonationConfig { currency: 'php'; minAmount: number; maxAmount: number
 interface IntentRequest { amount: number; requestId: string }
 
 const impacts = [
-  { image: '/images/digital_educ.png', width: 1448, height: 1086, title: 'Digital Education', description: 'Support accessible digital literacy learning, one useful skill at a time.' },
-  { image: '/images/tech_access.png', width: 1672, height: 941, title: 'Technology Access', description: 'Help communities access essential technology resources and explore new possibilities.' },
-  { image: '/images/com_empowerment.png', width: 1672, height: 941, title: 'Community Empowerment', description: 'Support opportunities to build practical digital skills and move forward with confidence.' },
+  { image: '/images/digital-education.webp', alt: 'A child’s hands typing on a laptop keyboard, seen from above.', title: 'Digital education', description: 'Support accessible digital literacy learning, one useful skill at a time.' },
+  { image: '/images/technology-access.webp', alt: 'Several laptops, phones, and notebooks shared on a wooden table, seen from above.', title: 'Technology access', description: 'Help learners get hands-on time with the devices and tools they need to practice.' },
+  { image: '/images/community-empowerment.webp', alt: 'Filipino schoolchildren in uniforms and backpacks walking along a village street, seen from behind.', title: 'Community empowerment', description: 'Help bring practical digital skills to schools and communities across the Philippines.' },
 ]
 
 function IntentCheckout({ request, onLock }: { request: IntentRequest; onLock: (locked: boolean) => void }) {
@@ -53,7 +55,7 @@ function IntentCheckout({ request, onLock }: { request: IntentRequest; onLock: (
     return () => { window.clearTimeout(timer); controller.abort() }
   }, [request, attempt])
 
-  if (error) return <div className="donation-notice"><p className="donation-error" role="alert">{error}</p><button className="button button-secondary" onClick={() => { setError(''); setAttempt(value => value + 1) }}>Try again</button></div>
+  if (error) return <div className="donation-notice"><p className="donation-error" role="alert">{error}</p><button type="button" className="button button-secondary" onClick={() => { setError(''); setAttempt(value => value + 1) }}>Try again</button></div>
   if (!clientSecret) return <p className="donation-notice" role="status">Preparing secure payment for {formatAmount(request.amount)}…</p>
   return <Elements key={clientSecret} stripe={getStripe()} options={{ clientSecret, appearance: {
     theme: 'night', variables: { colorPrimary: '#ff9f0a', colorBackground: '#202020', colorText: '#f5f5f5', colorTextSecondary: '#a3a3a3', colorDanger: '#ffb4ab', borderRadius: '12px', fontFamily: 'system-ui, sans-serif' },
@@ -106,8 +108,8 @@ export default function Donate() {
     <section className="donate-hero" aria-labelledby="donate-heading">
       <div className="container donate-hero__grid">
         <div className="hero-enter"><p className="eyebrow">Small steps. Shared possibilities.</p>
-          <h1 id="donate-heading">Help Bridge the <span>Digital Divide</span></h1>
-          <p className="donate-hero__subtitle">Your support helps ByteBridge make digital knowledge, tools, and opportunities more accessible to everyone.</p>
+          <h1 id="donate-heading">Help bridge the <span>digital divide</span></h1>
+          <p className="donate-hero__subtitle">Your support will help ByteBridge make digital knowledge, tools, and opportunities more accessible to everyone.</p>
           <p>Access to learning can open doors. Your generosity can help more people take their next step toward digital confidence.</p>
           <Link className="button button-primary" to="/donate#give">Make a Donation <ArrowRight aria-hidden="true" /></Link>
         </div>
@@ -117,19 +119,30 @@ export default function Donate() {
 
     <section className="section donate-impact" aria-labelledby="impact-heading"><div className="container">
       <ScrollReveal><p className="eyebrow">What your support can make possible</p><h2 id="impact-heading">More access. More opportunity.</h2><p className="donate-section-description">Three ways to help build a more inclusive digital future.</p></ScrollReveal>
-      <div className="donate-impact__grid">{impacts.map(({ image, width, height, title, description }, index) => <ScrollReveal key={title} delay={index * 80}><article className="donate-impact__card"><img className="donate-impact__image" src={image} width={width} height={height} alt="" loading="lazy" decoding="async" /><h3>{title}</h3><p>{description}</p></article></ScrollReveal>)}</div>
+      <div className="donate-impact__grid">{impacts.map(({ image, alt, title, description }, index) => <ScrollReveal key={title} delay={index * 80}><article className="donate-impact__card"><img className="donate-impact__image" src={image} width="1200" height="750" alt={alt} loading="lazy" decoding="async" /><h3>{title}</h3><p>{description}</p></article></ScrollReveal>)}</div>
+      <p className="donate-impact__credit">Illustrative stock photos from Unsplash, not ByteBridge participants. <Link to="/credits">Image credits</Link>.</p>
+      {organization.impact.givingExamples.length > 0 && (
+        <div className="giving-examples">
+          <h3>What your gift could pay for</h3>
+          <p>Planned uses of donations once workshops begin. Amounts are estimates.</p>
+          <dl className="impact-stats">{organization.impact.givingExamples.map(example => <div key={example.amount} className="impact-stat"><dt>{example.outcome}</dt><dd>{example.amount}</dd></div>)}</dl>
+        </div>
+      )}
     </div></section>
 
     <section className="section donate-give" id="give" tabIndex={-1} aria-labelledby="give-heading"><div className="container donate-give__grid">
-      <ScrollReveal className="donate-give__copy"><p className="eyebrow">Give with purpose</p><h2 id="give-heading">Make a Donation</h2><p>Choose an amount that feels right for you. Every contribution is a step toward making digital learning more accessible.</p><div className="donate-security"><ShieldCheck size={26} aria-hidden="true" /><div><h3>Secure payments through Stripe</h3><p>Payments are securely processed through Stripe. ByteBridge does not directly store your card details.</p></div></div><p className="donate-concept">ByteBridge is a student-created nonprofit concept. Online donations are available only when payment processing has been configured.</p></ScrollReveal>
+      <ScrollReveal className="donate-give__copy"><p className="eyebrow">Give with purpose</p><h2 id="give-heading">Make a donation</h2><p>Choose an amount that feels right for you. Every contribution is a step toward making digital learning more accessible.</p><div className="donate-security"><ShieldCheck size={26} aria-hidden="true" /><div><h3>Secure payments through Stripe</h3><p>Payments are securely processed through Stripe. ByteBridge does not directly store your card details.</p></div></div><p className="donate-concept">{isRegistered
+        ? `${organization.legal.registeredName || 'ByteBridge'} · SEC Reg. No. ${organization.legal.secRegistrationNumber}${organization.legal.birDoneeStatus ? ` · ${organization.legal.birDoneeStatus}` : ''}`
+        : 'ByteBridge is a student-led initiative preparing for formal registration. Donations are currently in demo mode.'} <Link to="/about#transparency">See our transparency details</Link>.</p></ScrollReveal>
       <div className="donation-panel">
+        {paymentTestMode && <p className="donation-demo-badge" role="note"><FlaskConical size={16} aria-hidden="true" />Demo mode: no real payments are processed.</p>}
         <p className="eyebrow">A one-time contribution</p>
         <fieldset disabled={locked} className="donation-amounts"><legend>Choose your donation amount</legend>
           <div className="donation-presets">{[10000, 25000, 50000, 100000].map(value => <button type="button" key={value} aria-pressed={selection === value} disabled={Boolean(config && (value < config.minAmount || value > config.maxAmount))} onClick={() => changeAmount(value)}>{formatAmount(value)}</button>)}</div>
           <button type="button" className="donation-custom-toggle" aria-pressed={selection === 'custom'} onClick={() => changeAmount('custom')}>Choose a custom amount</button>
           {selection === 'custom' && <div className="donation-custom"><label htmlFor="custom-amount">Custom amount (PHP)</label><input id="custom-amount" type="text" inputMode="decimal" value={custom} onChange={event => changeAmount('custom', event.target.value)} aria-describedby={valid ? 'amount-help' : 'amount-help amount-error'} aria-invalid={!valid} placeholder="e.g. 350.50" /></div>}
           <p id="amount-help" className="donation-help">{config ? `${formatAmount(config.minAmount)}–${formatAmount(config.maxAmount)}. ` : ''}Amounts are in Philippine pesos. Up to two decimal places.</p>
-          {!valid && <p id="amount-error" className="donation-error" role="alert">{config ? `Enter an amount from ${formatAmount(config.minAmount)} to ${formatAmount(config.maxAmount)}.` : 'Enter an amount from ₱100 to ₱100,000.'}</p>}
+          {!valid && <p id="amount-error" className="donation-error" role="alert">{config ? `Enter an amount from ${formatAmount(config.minAmount)} to ${formatAmount(config.maxAmount)}.` : 'Enter an amount in Philippine pesos, up to two decimal places.'}</p>}
         </fieldset>
         <p className="donation-total">Selected amount <strong>{valid && amount !== null ? formatAmount(amount) : '—'}</strong></p>
         {configState === 'loading' && <p role="status" className="donation-notice">Checking payment availability…</p>}
@@ -138,11 +151,13 @@ export default function Donate() {
           if (amount !== null) { setStarted(true); setRequest({ amount, requestId: crypto.randomUUID() }) }
         }}>Donate <ArrowRight aria-hidden="true" /></button>}
         {request && <IntentCheckout key={request.requestId} request={request} onLock={setLocked} />}
+        <p className="donation-consent">By donating, you agree to our <Link to="/privacy">Privacy Policy</Link>.</p>
         <p className="donation-help donation-footnote"><ShieldCheck size={15} aria-hidden="true" /> Payment details stay within Stripe.</p>
         {paymentTestMode && <p className="donation-demo">This is a demo, so no real money moves. Pay with the test card 4242 4242 4242 4242, any future date, and any CVC.</p>}
+        <LocalPayments />
       </div>
     </div></section>
 
-    <section className="donate-closing" aria-labelledby="closing-heading"><div className="container"><ScrollReveal><p className="eyebrow">Together, we can open doors</p><h2 id="closing-heading">Every Contribution Makes a Difference.</h2><p>Help build a future where everyone has the chance to learn, connect, and grow through technology.</p><Link to="/about" className="button button-secondary">Meet the purpose behind ByteBridge <ArrowRight aria-hidden="true" /></Link></ScrollReveal></div></section>
+    <section className="donate-closing" aria-labelledby="closing-heading"><div className="container"><ScrollReveal><p className="eyebrow">Together, we can open doors</p><h2 id="closing-heading">Every contribution makes a difference.</h2><p>Help build a future where everyone has the chance to learn, connect, and grow through technology.</p><Link to="/about" className="button button-secondary">Meet the purpose behind ByteBridge <ArrowRight aria-hidden="true" /></Link></ScrollReveal></div></section>
   </>
 }

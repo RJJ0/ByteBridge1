@@ -6,3 +6,4 @@ artifacts/
 !.env.example
 *.local
 server/data/
+.vercel/

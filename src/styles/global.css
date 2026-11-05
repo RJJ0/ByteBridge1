@@ -1,11 +1,14 @@
 ﻿:root {
-  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: var(--font-sans);
   color: var(--text-primary);
   background: var(--canvas);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color-scheme: dark;
+
+  /* Color */
   --canvas: #0d0d0d;
   --surface: #171717;
   --card: #202020;
@@ -17,23 +20,39 @@
   --text-muted: #a3a3a3;
   --text-on-accent: #17120a;
   --text-on-accent-muted: #3b2a10;
-  --border-strong: #626262;
-  --border: #363636;
+  --border-strong: #7a7a7a; /* control edges: at least 3:1 against --canvas, --surface and --card */
+  --border: #363636;        /* decorative card and section dividers */
   --border-accent: #806025;
   --danger: #ffb4ab;
-  --navy: var(--text-primary);
-  --blue: var(--accent);
-  --mint: var(--accent);
-  --slate: var(--text-muted);
-  --font-heading: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
-  --radius: 20px;
+
+  /* Type: one scale for the whole site. Nothing smaller than --text-xs. */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: var(--font-sans);
+  --text-xs: .75rem;     /* 12px: labels, captions, legal lines */
+  --text-sm: .875rem;    /* 14px: secondary copy, links, meta */
+  --text-base: 1rem;     /* 16px: body copy */
+  --text-lg: 1.125rem;   /* 18px: lead paragraphs */
+  --text-xl: 1.25rem;    /* 20px: card headings */
+  --text-2xl: 1.5625rem; /* 25px: small display */
+  --leading-body: 1.6;   /* paragraphs */
+  --leading-snug: 1.5;   /* 12-14px text */
+  --measure: 36rem;      /* ~70 characters of 16px Plus Jakarta Sans */
+
+  /* Shape and spacing */
+  --radius-sm: 12px;     /* icons, inputs, notices, images inside cards */
+  --radius: 20px;        /* cards and panels */
+  --radius-lg: 28px;     /* feature panels (donation form, closing call to action) */
+  --radius-pill: 999px;  /* buttons, chips */
+  --card-pad: 32px;
   --shadow: 0 16px 40px -20px #0008;
   --ease: cubic-bezier(.22, 1, .36, 1);
-  color-scheme: dark;
 }
+/* Breakpoints used across the site: 1023px (tablet), 767px (phone), 479px (small phone). */
+@media (max-width: 767px) { :root { --card-pad: 24px; } }
+
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-padding-top: 110px; }
-body { margin: 0; min-width: 320px; font-size: 15px; line-height: 1.75; }
+body { margin: 0; min-width: 320px; font-size: var(--text-base); line-height: var(--leading-body); }
 button, input { font: inherit; }
 button, a { -webkit-tap-highlight-color: transparent; }
 button { cursor: pointer; }
@@ -42,7 +61,8 @@ img, svg { display: block; }
 img { max-width: 100%; }
 button svg, a svg { flex-shrink: 0; }
 ::selection { background: var(--accent); color: var(--text-on-accent); }
-:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; border-radius: 4px; }
+/* The outline follows each element's own corner radius, so pills stay pills when focused. */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 5px; }
 main:focus, section[tabindex='-1']:focus { outline: none; }
 h1, h2, h3, h4, p { margin: 0; }
 h1, h2, h3, h4 { font-family: var(--font-heading); font-weight: 750; }
@@ -50,37 +70,57 @@ h1, h2 { text-wrap: balance; }
 h1 { font-size: clamp(3rem, 6.4vw, 6rem); line-height: 1.08; letter-spacing: -.06em; }
 h2 { font-size: clamp(2rem, 3.7vw, 3.25rem); line-height: 1.18; letter-spacing: -.045em; }
 h2 span { color: var(--accent); }
-h3 { font-size: 1.25rem; line-height: 1.4; letter-spacing: -.03em; }
+h3 { font-size: var(--text-xl); line-height: 1.4; letter-spacing: -.03em; }
 p { color: var(--text-muted); }
 ul { padding: 0; margin: 0; list-style: none; }
+
 .container { width: min(1200px, calc(100% - 96px)); margin-inline: auto; }
 .section { padding-block: clamp(64px, 7vw, 104px); }
-.eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; color: var(--text-muted); font-size: 11px; line-height: 1.6; letter-spacing: .08em; font-weight: 600; }
+.eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 22px; color: var(--text-muted); font-size: var(--text-xs); line-height: var(--leading-snug); letter-spacing: .08em; font-weight: 600; }
 .eyebrow::before { content: ''; width: 8px; height: 8px; flex-shrink: 0; border-radius: 50%; background: var(--accent); box-shadow: 4px 0 0 -1px var(--text-primary); }
-.button { display: inline-flex; justify-content: center; align-items: center; gap: 12px; min-height: 50px; padding: 12px 24px; border: 1px solid transparent; border-radius: 999px; font-size: 13px; font-weight: 650; line-height: 1.5; transition: background 180ms, color 180ms, border-color 180ms, box-shadow 180ms, transform 180ms var(--ease); }
-.button svg { width: 20px; height: 20px; transition: transform 180ms; }
-.button:hover { transform: translateY(-2px); }
-.button:hover svg { transform: translateX(3px); }
+
+/* Buttons: one default size and one small size (navbar only). Same size on every screen. */
+.button { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 48px; padding: 12px 24px; border: 1px solid transparent; border-radius: var(--radius-pill); font-size: var(--text-base); font-weight: 650; line-height: 1.25; transition: background 180ms, color 180ms, border-color 180ms, box-shadow 180ms, transform 180ms var(--ease); }
+.button svg { width: 18px; height: 18px; transition: transform 180ms; }
 .button:active { transform: translateY(1px) scale(.98); }
+.button-sm { gap: 8px; min-height: 44px; padding: 10px 20px; font-size: var(--text-sm); }
+.button-sm svg { width: 16px; height: 16px; }
 .button-primary, .button-mint { color: var(--text-on-accent); background: var(--accent); }
-.button-primary:hover, .button-mint:hover { background: var(--accent-hover); box-shadow: 0 6px 20px #ff9f0a12; }
 .button-secondary { color: var(--text-primary); border-color: var(--border-strong); background: transparent; }
-.button-secondary:hover { border-color: var(--accent); background: var(--card); }
-.text-link { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; font-size: 13px; font-weight: 650; color: var(--accent); }
-.text-link svg { width: 17px; transition: transform 180ms; }
-.text-link:hover svg { transform: translateX(4px); }
-.skip-link { position: fixed; top: 10px; left: 16px; z-index: 1000; padding: 12px 22px; border-radius: 8px; background: var(--accent); color: var(--text-on-accent); transform: translateY(-150%); }
+
+/* Standalone arrow link: the single style for "go somewhere" text links. */
+.text-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--accent); font-size: var(--text-sm); font-weight: 650; transition: color 180ms; }
+.text-link svg { width: 16px; height: 16px; transition: transform 180ms; }
+
+/* Hover feedback only where a pointer can hover (no "stuck" hover states after a tap on touch screens). */
+@media (hover: hover) {
+  .button:hover { transform: translateY(-2px); }
+  .button-primary:hover, .button-mint:hover { background: var(--accent-hover); box-shadow: 0 6px 20px #ff9f0a12; }
+  .button-secondary:hover { border-color: var(--accent); background: var(--card); }
+  .text-link:hover { color: var(--accent-hover); }
+  /* Arrows move the way they point; other icons (heart, mail) stay put. */
+  :is(.button, .text-link):hover .lucide-arrow-right { transform: translateX(3px); }
+  :is(.button, .text-link):hover .lucide-arrow-up-right { transform: translate(2px, -2px); }
+}
+
+.skip-link { position: fixed; top: 10px; left: 16px; z-index: 1000; padding: 12px 22px; border-radius: var(--radius-sm); background: var(--accent); color: var(--text-on-accent); transform: translateY(-150%); }
 .skip-link:focus { transform: translateY(0); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
-@media (max-width: 900px) { .container { width: calc(100% - 56px); } }
-@media (max-width: 600px) {
+
+/* Development-only reminders for organization details (never rendered in production builds). */
+.setup-hint { margin-top: 14px; padding: 12px 14px; border: 1px dashed var(--accent); border-radius: var(--radius-sm); background: var(--accent-soft); color: var(--text-primary); font-size: var(--text-xs); line-height: var(--leading-snug); }
+.setup-hint strong { color: var(--accent); }
+.setup-hint code { font-size: var(--text-xs); color: var(--accent-hover); }
+
+@media (max-width: 1023px) {
+  .container { width: calc(100% - 56px); }
+}
+@media (max-width: 767px) {
   .container { width: calc(100% - 40px); }
-  body { font-size: 14px; }
-  .eyebrow { font-size: 10px; margin-bottom: 18px; }
-  .button { min-height: 48px; padding-inline: 20px; }
+  .eyebrow { margin-bottom: 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition: none !important; scroll-behavior: auto !important; }
-  .button:hover, .button:active, .program-card:hover, .program-card:focus-within, .program-card:hover .program-icon, .value-card:hover, .value-card:hover .value-card__icon, .team-card:hover, .donate-impact__card:hover { transform: none; }
+  .button:hover, .button:active, .button svg, .text-link svg { transform: none; }
 }

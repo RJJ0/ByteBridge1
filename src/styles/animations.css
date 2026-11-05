@@ -8,15 +8,6 @@
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-@keyframes bytebridge-gradient-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-  50% { transform: translate3d(12px, -16px, 0) scale(1.04); }
-}
-
-.scroll-reveal.is-revealed {
-  animation: bytebridge-reveal 450ms cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms) both;
-}
-
 .hero-enter {
   animation: bytebridge-reveal 550ms cubic-bezier(.22, 1, .36, 1) var(--reveal-delay, 0ms) both;
 }
@@ -25,11 +16,7 @@
   animation: bytebridge-image-reveal 600ms cubic-bezier(.22, 1, .36, 1) 180ms both;
 }
 
-.gradient-drift { animation: none; }
-
 @media (prefers-reduced-motion: reduce) {
-  .scroll-reveal.is-revealed,
   .hero-enter,
-  .hero-image-enter,
-  .gradient-drift { animation: none; }
+  .hero-image-enter { animation: none; }
 }

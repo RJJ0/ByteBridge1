@@ -6,9 +6,20 @@ const cors = require('cors');
 const Stripe = require('stripe');
 const { recordWebhookEvent } = require('./donation-store');
 
-function createApp({ env = process.env, stripeClient, recordEvent = recordWebhookEvent } = {}) {
+function createApp({ env = process.env, stripeClient, recordEvent, donationStore } = {}) {
   const app = express();
   const production = env.NODE_ENV === 'production';
+  let store = donationStore;
+  if (!store && env.DATABASE_URL) {
+    const { Pool } = require('pg');
+    const { createPostgresStore } = require('./postgres-store');
+    const pool = new Pool({ connectionString: env.DATABASE_URL, max: 3,
+      connectionTimeoutMillis: 10000, idleTimeoutMillis: 10000, allowExitOnIdle: true });
+    // Pool errors can contain connection details; never log them.
+    pool.on('error', () => {});
+    store = createPostgresStore(pool);
+  }
+  const persistEvent = recordEvent || (store ? event => store.record(event) : recordWebhookEvent);
   const secretKey = (env.STRIPE_SECRET_KEY || '').trim();
   const keyValid = /^sk_(test|live)_\S+$/.test(secretKey)
     && (production || secretKey.startsWith('sk_test_'));
@@ -33,8 +44,9 @@ function createApp({ env = process.env, stripeClient, recordEvent = recordWebhoo
     next();
   });
 
-  app.post('/webhook', express.raw({ type: 'application/json', limit: '256kb' }), (req, res) => {
+  app.post('/webhook', express.raw({ type: 'application/json', limit: '256kb' }), async (req, res) => {
     if (!stripe || !env.STRIPE_WEBHOOK_SECRET) return res.status(503).json({ error: 'Webhook not configured.' });
+    if (production && !store && !recordEvent) return res.status(503).json({ error: 'Donation storage not configured.' });
     let event;
     try {
       event = stripe.webhooks.constructEvent(req.body, req.headers['stripe-signature'], env.STRIPE_WEBHOOK_SECRET);
@@ -50,7 +62,7 @@ function createApp({ env = process.env, stripeClient, recordEvent = recordWebhoo
       return res.status(400).json({ error: 'Unexpected donation details.' });
     }
     try {
-      recordEvent(event, env.DONATION_DATABASE_PATH || path.join(__dirname, 'data', 'donations.sqlite'));
+      await persistEvent(event, env.DONATION_DATABASE_PATH || path.join(__dirname, 'data', 'donations.sqlite'));
       return res.json({ received: true });
     } catch {
       // A non-2xx response lets Stripe retry. Never acknowledge an unpersisted donation.
@@ -78,8 +90,10 @@ function createApp({ env = process.env, stripeClient, recordEvent = recordWebhoo
   async function verifyAccount() {
     if (!stripe || !keyValid) return false;
     if (production && !env.STRIPE_WEBHOOK_SECRET) return false;
+    if (production && !store && !recordEvent) return false;
     if (Date.now() < verifiedUntil) return true;
     verification ??= (async () => {
+      if (store) await store.ready();
       const account = await stripe.accounts.retrieve();
       if (!account.country) return false;
       // Test keys can create test payments before the live account is activated.
@@ -154,13 +168,16 @@ function createApp({ env = process.env, stripeClient, recordEvent = recordWebhoo
   return app;
 }
 
+const app = createApp();
 if (require.main === module) {
   const port = Number(process.env.PORT || 4242);
-  createApp().listen(port, '127.0.0.1', () => {
+  app.listen(port, '127.0.0.1', () => {
     console.log(`Donation API listening at http://localhost:${port}`);
     if (!/^sk_test_/.test(process.env.STRIPE_SECRET_KEY || '') && process.env.NODE_ENV !== 'production') {
       console.log('Checkout disabled: configure a valid Stripe test secret key in server/.env.');
     }
   });
 }
-module.exports = { createApp };
+// Vercel imports the app; local npm start still uses the listener above.
+module.exports = app;
+module.exports.createApp = createApp;

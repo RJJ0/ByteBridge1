@@ -23,4 +23,23 @@ export interface TeamMember {
  *   biography: 'A short, approved biography about this member.',
  * },
  */
-export const teamMembers: TeamMember[] = []
+export const teamMembers: TeamMember[] = [
+  {
+    id: 'richard-jebolan',
+    name: 'Richard Jebolan',
+    role: 'Founder and Program Lead',
+    biography: 'Leads ByteBridge’s direction and shapes the learning program, from workshop content to how sessions are delivered.',
+  },
+  {
+    id: 'raleigh-tracer-cabotage',
+    name: 'Raleigh Tracer Cabotage',
+    role: 'Co-founder and Operations',
+    biography: 'Coordinates the planning and day-to-day logistics that help workshops run smoothly.',
+  },
+  {
+    id: 'saul-goodman',
+    name: 'Saul Goodman',
+    role: 'Co-founder and Partnerships',
+    biography: 'Builds relationships with schools, communities, and organizations interested in bringing digital learning to their learners.',
+  },
+]

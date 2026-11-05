@@ -9,6 +9,20 @@ import PaymentSuccess from './pages/PaymentSuccess'
 import ThankYou from './pages/ThankYou'
 import Home from './pages/Home'
 import About from './pages/About'
+import Privacy from './pages/Privacy'
+import NotFound from './pages/NotFound'
+import Credits from './pages/Credits'
+
+const pageMeta: Record<string, [title: string, description: string]> = {
+  '/': ['ByteBridge | Digital Skills for Filipino Learners', 'ByteBridge is a student-led initiative working to help Filipino students and underserved communities build practical digital skills: computer basics, online safety, and a first introduction to coding.'],
+  '/about': ['About Us | ByteBridge', 'Discover the purpose, principles, people, and transparency details behind ByteBridge.'],
+  '/donate': ['Donate | ByteBridge', 'Help bridge the digital divide. Donate securely to support practical digital learning for Filipino students and communities.'],
+  '/credits': ['Image Credits | ByteBridge', 'Sources and licenses for the photos and fonts used on the ByteBridge website.'],
+  '/privacy': ['Privacy Policy | ByteBridge', 'How ByteBridge collects, uses, and protects personal information under the Philippine Data Privacy Act of 2012.'],
+  '/payment-success': ['Payment Status | ByteBridge', 'Check the status of your donation securely through Stripe.'],
+  '/donation/success': ['Payment Status | ByteBridge', 'Check the status of your donation securely through Stripe.'],
+}
+const notFoundMeta: [string, string] = ['Page Not Found | ByteBridge', 'The page you are looking for could not be found.']
 
 // Handle route effects
 function RouteEffects() {
@@ -16,20 +30,9 @@ function RouteEffects() {
   const firstVisit = useRef(true)
 
   useEffect(() => {
-    const isAbout = location.pathname === '/about'
-    const isDonate = location.pathname === '/donate'
-    const isPayment = location.pathname === '/payment-success' || location.pathname === '/donation/success'
-
-    document.title = isPayment ? 'Payment Status | ByteBridge' : isDonate ? 'Donation | ByteBridge' : isAbout
-      ? 'About Us | ByteBridge'
-      : 'ByteBridge | Digital Skills for Everyone'
-
-    document.querySelector('meta[name="description"]')?.setAttribute(
-      'content',
-      isPayment ? 'Check the status of your donation securely through Stripe.' : isDonate ? 'Help bridge the digital divide through digital education, technology access, and community empowerment.' : isAbout
-        ? 'Discover the purpose, principles, and student-led team behind ByteBridge.'
-        : 'Bridging the digital divide, one skill at a time. Explore ByteBridge.'
-    )
+    const [title, description] = pageMeta[location.pathname] ?? notFoundMeta
+    document.title = title
+    document.querySelector('meta[name="description"]')?.setAttribute('content', description)
 
     const shouldFocus = !firstVisit.current || Boolean(location.hash)
 
@@ -88,10 +91,10 @@ export default function App() {
 
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/donation/success" element={<ThankYou />} />
-          <Route
-            path="*"
-            element={<Navigate to="/" replace />}
-          />
+          <Route path="/privacy" element={<Privacy />} />
+          <Route path="/credits" element={<Credits />} />
+          <Route path="/donation" element={<Navigate to="/donate" replace />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowUpRight } from 'lucide-react'
-import thankYouImage from '../../thankyou.jpg'
+import { ArrowRight } from 'lucide-react'
+import thankYouImage from '../assets/thankyou.jpg'
 import { apiUrl, formatAmount } from '../lib/payments'
 import '../styles/thank-you.css'
 
@@ -51,7 +51,7 @@ export default function ThankYou() {
 
   const succeeded = result?.status === 'succeeded'
   const message = !result ? 'Checking your payment securely with Stripe…'
-    : succeeded ? 'Your generosity helps make digital skills and technology more accessible to everyone.'
+    : succeeded ? 'Your generosity will help make digital skills and technology more accessible to everyone.'
       : result.status === 'processing' ? 'Your payment is still processing. Please check its status before making another donation.'
         : result.status === 'unverified' ? 'We could not verify a payment. Please check with your payment provider before retrying.'
           : result.status === 'canceled' ? 'This payment was canceled. No successful donation has been confirmed.'
@@ -65,8 +65,8 @@ export default function ThankYou() {
         <p className="thank-you__message">{message}</p>
         {succeeded && result.amount !== null && <p className="thank-you__amount">Confirmed donation <strong>{formatAmount(result.amount)}</strong></p>}
         <div className="thank-you__actions">
-          <Link className="button button-primary" to={succeeded ? '/' : '/donate#give'}>{succeeded ? 'Back to Home' : 'Back to Donation'}<ArrowUpRight aria-hidden="true" /></Link>
-          {result && !succeeded && <button className="text-link thank-you__retry" onClick={() => { setResult(null); setAttempt(value => value + 1) }}>Check status again</button>}
+          <Link className="button button-primary" to={succeeded ? '/' : '/donate#give'}>{succeeded ? 'Back to Home' : 'Back to Donation'}<ArrowRight aria-hidden="true" /></Link>
+          {result && !succeeded && <button type="button" className="text-link thank-you__retry" onClick={() => { setResult(null); setAttempt(value => value + 1) }}>Check status again</button>}
         </div>
       </div>
       <div className="thank-you__art" aria-hidden="true">

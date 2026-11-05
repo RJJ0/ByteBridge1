@@ -2,7 +2,6 @@ import { Link } from 'react-router-dom'
 import {
   Accessibility,
   ArrowRight,
-  ArrowUpRight,
   BookOpen,
   Code2,
   Compass,
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react'
 import ScrollReveal from '../components/ScrollReveal'
 import TeamCard from '../components/TeamCard'
+import Transparency from '../components/Transparency'
 import { teamMembers } from '../data/team'
 import '../styles/about.css'
 
@@ -70,9 +70,9 @@ export default function About() {
           </div>
           <div className="about-hero__grid">
             <div className="about-hero__copy">
-              <h1 id="about-heading">Technology Connects Us.<br /><span>People Move Us Forward.</span></h1>
+              <h1 id="about-heading">Technology connects us.<br /><span>People move us forward.</span></h1>
               <p className="about-hero__description">Discover the purpose, principles, and people behind ByteBridge.</p>
-              <a className="about-hero__link" href="#our-story">Get to know ByteBridge <ArrowRight size={18} aria-hidden="true" /></a>
+              <a className="text-link" href="#our-story">Get to know ByteBridge <ArrowRight size={18} aria-hidden="true" /></a>
             </div>
             <div className="about-hero__aside">
               <div className="about-bridge" aria-hidden="true">
@@ -106,11 +106,11 @@ export default function About() {
           </ScrollReveal>
           <ScrollReveal className="about-story__copy" delay={120}>
             <p className="eyebrow">Our story</p>
-            <h2 id="story-heading">Built on the Belief That Digital Knowledge <span>Should Be Accessible.</span></h2>
+            <h2 id="story-heading">Built on the belief that digital knowledge <span>should be accessible.</span></h2>
             <p>Knowing how to use technology can turn an everyday task into a new possibility: finding a learning resource, creating a first résumé, or recognizing an unsafe message.</p>
-            <p>ByteBridge is a student-created nonprofit concept inspired by these possibilities. It explores how practical digital education could support Filipino students, young adults, and communities with limited access to learning opportunities.</p>
-            <p>Our starting point is simple: students can contribute by sharing clear information, encouraging responsible technology use, and making space for others to learn. This website presents that purpose and our proposed approach.</p>
-            <div className="about-story__note"><span /> A student project with a people-first purpose.</div>
+            <p>ByteBridge is a student-led initiative inspired by these possibilities. We are working to bring practical digital education to Filipino students, young adults, and communities with limited access to learning opportunities.</p>
+            <p>Our starting point is simple: students can contribute by sharing clear information, encouraging responsible technology use, and making space for others to learn. This website shares that purpose and the program we are preparing to launch.</p>
+            <div className="about-story__note"><span /> A student-led initiative with a people-first purpose.</div>
           </ScrollReveal>
         </div>
       </section>
@@ -124,14 +124,14 @@ export default function About() {
           <div className="about-purpose__grid">
             <ScrollReveal className="about-purpose__reveal">
               <article className="purpose-card purpose-card--mission">
-                <div className="purpose-card__top"><span className="purpose-card__icon"><Target size={27} strokeWidth={1.7} aria-hidden="true" /></span><span>01 / Our mission</span></div>
+                <div className="purpose-card__top"><span className="purpose-card__icon"><Target size={27} strokeWidth={1.7} aria-hidden="true" /></span><span>Our mission</span></div>
                 <h3>To make digital knowledge and practical technology skills accessible to more people.</h3>
                 <p>We aim to help learners build useful everyday skills, navigate online spaces safely, and discover what technology can make possible.</p>
               </article>
             </ScrollReveal>
             <ScrollReveal className="about-purpose__reveal" delay={100}>
               <article className="purpose-card purpose-card--vision">
-                <div className="purpose-card__top"><span className="purpose-card__icon"><Compass size={27} strokeWidth={1.7} aria-hidden="true" /></span><span>02 / Our vision</span></div>
+                <div className="purpose-card__top"><span className="purpose-card__icon"><Compass size={27} strokeWidth={1.7} aria-hidden="true" /></span><span>Our vision</span></div>
                 <h3>A future where technology serves as a bridge to education, confidence, and opportunity.</h3>
                 <p>A future where a person’s background or financial situation does not define their ability to participate in the digital world.</p>
               </article>
@@ -143,7 +143,7 @@ export default function About() {
       <section className="section about-values" aria-labelledby="values-heading">
         <div className="container">
           <ScrollReveal className="about-section-heading about-section-heading--split">
-            <div><p className="eyebrow">Our core values</p><h2 id="values-heading">What We <span>Believe In.</span></h2></div>
+            <div><p className="eyebrow">Our core values</p><h2 id="values-heading">What we <span>believe in.</span></h2></div>
             <p>Four principles that shape how we think about technology, learning, and community.</p>
           </ScrollReveal>
           <div className="about-values__grid">
@@ -151,7 +151,6 @@ export default function About() {
               <ScrollReveal key={title} delay={index * 70}>
                 <article className="value-card">
                   <span className="value-card__icon"><Icon size={25} strokeWidth={1.7} aria-hidden="true" /></span>
-                  <span className="value-card__number" aria-hidden="true">0{index + 1}</span>
                   <h3>{title}</h3>
                   <p>{description}</p>
                 </article>
@@ -165,8 +164,8 @@ export default function About() {
         <div className="container">
           <ScrollReveal className="about-section-heading about-section-heading--center">
             <p className="eyebrow">The people behind the purpose</p>
-            <h2 id="team-heading">The Minds Behind <span>ByteBridge.</span></h2>
-            <p>A student-led concept, shaped by curiosity, shared responsibility, and the belief that knowledge is better when it is shared.</p>
+            <h2 id="team-heading">The minds behind <span>ByteBridge.</span></h2>
+            <p>A student-led initiative, shaped by curiosity, shared responsibility, and the belief that knowledge is better when it is shared.</p>
           </ScrollReveal>
           {teamMembers.length > 0 ? (
             <div className="team-grid">
@@ -199,11 +198,13 @@ export default function About() {
         </div>
       </section>
 
+      <Transparency />
+
       <section className="about-cta" aria-labelledby="about-cta-heading">
         <div className="container">
           <ScrollReveal className="about-cta__inner">
-            <div><p className="eyebrow">The next step starts with understanding</p><h2 id="about-cta-heading">Explore What Drives Us.</h2><p>See how small steps in digital learning can open up new possibilities.</p></div>
-            <Link className="button button-primary about-cta__button" to="/#mission">Back to Our Mission <ArrowUpRight size={20} aria-hidden="true" /></Link>
+            <div><p className="eyebrow">The next step starts with understanding</p><h2 id="about-cta-heading">Explore what drives us.</h2><p>See how small steps in digital learning can open up new possibilities.</p></div>
+            <Link className="button button-primary about-cta__button" to="/donate#give">Support Our Mission <ArrowRight aria-hidden="true" /></Link>
           </ScrollReveal>
         </div>
       </section>

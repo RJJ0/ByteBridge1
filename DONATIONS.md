@@ -2,6 +2,8 @@
 
 The donation frontend and Express payment API are included in this repository. Checkout is enabled only after the backend verifies the Stripe account can accept PHP card payments. The selected amount is always sent as integer centavos and verified against Stripe before confirmation.
 
+For Vercel, follow [VERCEL.md](VERCEL.md). Set `DATABASE_URL` to use hosted PostgreSQL; production checkout checks storage readiness. Local development can continue using SQLite.
+
 ## Configuration and startup
 
 Use Node.js 24 or later. The backend uses Node's built-in SQLite support for webhook records.

@@ -185,8 +185,23 @@ test('signed webhooks persist once, protect success from older events, and rejec
   db.close();
 });
 
+test('production checkout requires persistent storage and waits for storage readiness', async t => {
+  const missing = await fixture(t, { env: { NODE_ENV: 'production' } });
+  assert.equal((await fetch(`${missing.base}/donation-config`)).status, 503);
+  let ready = false;
+  const configured = await fixture(t, { env: { NODE_ENV: 'production' }, appOptions: {
+    donationStore: { ready: async () => { ready = true; }, record: async () => {} },
+  } });
+  assert.equal((await fetch(`${configured.base}/donation-config`)).status, 200);
+  assert.equal(ready, true);
+  const offline = await fixture(t, { env: { NODE_ENV: 'production' }, appOptions: {
+    donationStore: { ready: async () => { throw new Error('offline'); } },
+  } });
+  assert.equal((await fetch(`${offline.base}/donation-config`)).status, 503);
+});
+
 test('webhook persistence failures return an error so Stripe can retry', async t => {
-  const { base } = await fixture(t, { appOptions: { recordEvent: () => { throw new Error('disk unavailable'); } } });
+  const { base } = await fixture(t, { appOptions: { recordEvent: async () => { throw new Error('database unavailable'); } } });
   const payload = JSON.stringify({ id: 'evt_fixture', type: 'payment_intent.processing', created: 100, livemode: false, data: { object: { amount: 25000, currency: 'php', metadata: { project: 'bytebridge' } } } });
   const response = await fetch(`${base}/webhook`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'stripe-signature': Stripe.webhooks.generateTestHeaderString({ payload, secret: 'whsec_fixture' }) }, body: payload });
   assert.equal(response.status, 500);

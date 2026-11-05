@@ -13,9 +13,14 @@ The images are served locally so the website does not depend on an external imag
 
 ## Fonts
 
-Inter (variable weights 400–700) and Plus Jakarta Sans (variable weights 400–800) are served locally as Latin WOFF2 files, downloaded from Google Fonts on October 9, 2026. Font loading uses `font-display: swap` with system fallbacks. The two font files total approximately 74 KB.
+Plus Jakarta Sans (variable weights 400–800) is the only typeface, served locally as a Latin WOFF2 file downloaded from Google Fonts on October 9, 2026. Font loading uses `font-display: swap` with system fallbacks. The font file is approximately 27 KB.
 
-- [Inter source and license](https://github.com/google/fonts/tree/main/ofl/inter); license included at `public/fonts/Inter-OFL.txt`.
 - [Plus Jakarta Sans source and license](https://github.com/google/fonts/tree/main/ofl/plusjakartasans); license included at `public/fonts/Plus-Jakarta-Sans-OFL.txt`.
 
 Both font families are licensed under the SIL Open Font License 1.1. The original license notices are preserved with the font files.
+
+## Derived images
+
+- Donate-page photos (`digital-education.webp`, `technology-access.webp`, `community-empowerment.webp`): see `CREDITS.md`.
+- `public/images/og-image.jpg`: 1200×630 social sharing image, center crop of `digital-learning.jpg` (Unsplash License, above).
+- `public/apple-touch-icon.png`: 180×180 raster of `public/favicon.svg`.

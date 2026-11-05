@@ -4,6 +4,8 @@ A responsive nonprofit concept created for a student project. Built in React + T
 
 Donation setup and payment limitations are documented in [DONATIONS.md](DONATIONS.md). The Express API is in `server/`; start it with `npm start --prefix server` using Node.js 24+. Online checkout remains unavailable until matching Stripe test keys are configured and the API verifies PHP card-payment support.
 
+Vercel deployment instructions are in [VERCEL.md](VERCEL.md), including the separate frontend/backend projects, PostgreSQL database, and Stripe test webhook.
+
 ## Run locally
 
 ```sh

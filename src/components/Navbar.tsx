@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type FocusEvent } from 'react'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowRight, Heart } from 'lucide-react'
 import { Link, NavLink } from 'react-router-dom'
 import Brand from './Brand'
 import '../styles/navbar.css'
@@ -7,7 +7,6 @@ import '../styles/navbar.css'
 const navigation = [
   { to: '/', label: 'Home' },
   { to: '/about', label: 'About Us' },
-  { to: '/donate', label: 'Donation' },
 ]
 
 export default function Navbar() {
@@ -75,8 +74,9 @@ export default function Navbar() {
           {navigation.map(({ to, label }) => (
             <NavLink key={to} to={to} end className="navigation-link">{label}</NavLink>
           ))}
-          <Link className="button button-primary navbar-cta" to="/#mission">
-            Our mission <ArrowUpRight size={17} aria-hidden="true" />
+          <Link className="navigation-link" to="/#get-involved">Get Involved</Link>
+          <Link className="button button-primary button-sm navbar-cta" to="/donate#give">
+            Donate <Heart size={17} aria-hidden="true" />
           </Link>
         </nav>
 
@@ -98,11 +98,14 @@ export default function Navbar() {
           <nav id="mobile-navigation" className="mobile-navigation container" aria-label="Mobile navigation">
             {navigation.map(({ to, label }) => (
               <NavLink key={to} to={to} end className="navigation-link" onClick={closeMenu}>
-                {label}<ArrowUpRight size={18} aria-hidden="true" />
+                {label}<ArrowRight size={18} aria-hidden="true" />
               </NavLink>
             ))}
-            <Link className="button button-primary" to="/#mission" onClick={closeMenu}>
-              Our mission <ArrowUpRight size={17} aria-hidden="true" />
+            <Link className="navigation-link" to="/#get-involved" onClick={closeMenu}>
+              Get Involved<ArrowRight size={18} aria-hidden="true" />
+            </Link>
+            <Link className="button button-primary" to="/donate#give" onClick={closeMenu}>
+              Donate <Heart size={17} aria-hidden="true" />
             </Link>
             <p>A little knowledge. A world of possibility.</p>
           </nav>

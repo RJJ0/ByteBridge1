@@ -29,7 +29,7 @@ User working style: implement requested changes directly, keep reasoning and fin
 
 ## Stack / architecture
 
-- Frontend: React 19, TypeScript 6, Vite 8, React Router 7, Lucide icons, plain CSS, locally hosted Inter + Plus Jakarta Sans. No Tailwind/UI framework/animation dependency.
+- Frontend: React 19, TypeScript 6, Vite 8, React Router 7, Lucide icons, plain CSS, locally hosted Plus Jakarta Sans. No Tailwind/UI framework/animation dependency.
 - Stripe frontend: `@stripe/react-stripe-js` 7, `@stripe/stripe-js` 10. Lazy loader comes from **`@stripe/stripe-js/pure`**, avoiding Stripe network requests on unrelated pages.
 - Backend: separate CommonJS package in `server/`; Express 5, cors, dotenv, Stripe Node SDK 23.0.1. Frontend package is ESM.
 - `src/App.tsx`: BrowserRouter, metadata, route focus/hash scrolling, skip link, Navbar/Footer. `/` Home; `/about` About; `/donate` Donate; `/payment-success` verified status. Unknown routes redirect Home. Preserve these behaviors.
